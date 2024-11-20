@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { ListChecks, AlertTriangle, Users, Video, Bell, Lock, MessageCircle } from 'lucide-react';
+import { motion, useAnimation } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 const Page = () => {
   const [timeLeft, setTimeLeft] = useState({
@@ -10,6 +12,30 @@ const Page = () => {
     minutes: 0,
     seconds: 0
   });
+  const [inView, setInView] = useState(false);
+
+  const units: (keyof typeof timeLeft)[] = ["days", "hours", "minutes", "seconds"];
+
+  const controls = useAnimation();
+  const { ref, inView: inViewObserver } = useInView({
+    triggerOnce: true, // Acionar a animação apenas uma vez
+    threshold: 0.2, // Acionar quando 20% da seção estiver visível
+  });
+
+  useEffect(() => {
+    setInView(inViewObserver);
+  }, [inViewObserver]);
+
+  const variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  useEffect(() => {
+    if (inView) {
+      controls.start("visible");
+    }
+  }, [inView, controls]);
 
   useEffect(() => {
     // Define a data final (próxima sexta-feira às 23:59)
@@ -135,27 +161,27 @@ const Page = () => {
         Iniciar Projeto Agora
       </button> 
     </div>
-        <div className='flex flex-col items-center justify-center text-center p-8 max-w-6xl mx-auto'>
-        <div className="text-center mb-6 bg-red-600 p-4 rounded-lg w-full max-w-4xl">
-            <p className="text-lg font-bold mb-4">
+        <div className='flex flex-col items-center justify-center text-center p-8 w-full bg-red-600 mx-auto'>
+        <div className="text-center bg-red-600 p-4 rounded-lg w-full max-w-4xl">
+            <p className="text-xl font-bold mb-4 text-white ">
             ATENÇÃO: A CONDIÇÃO ESPECIAL APRESENTADA COM TODOS OS SEUS ITENS ESTÁ VÁLIDA SOMENTE ATÉ 23H59 DESSA SEXTA-FEIRA
             </p>
         
             {/* Countdown Timer */}
-            <div className="flex justify-center space-x-4">
-                <div className="flex flex-col items-center">
+            <div className="flex justify-center space-x-4 text-white">
+                <div className="flex flex-col items-center bg-black px-4 py-2">
                     <span className="text-4xl font-bold">{timeLeft.days.toString().padStart(2, '0')}</span>
                     <span className="text-sm">Dias</span>
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center bg-black px-4 py-2">
                     <span className="text-4xl font-bold">{timeLeft.hours.toString().padStart(2, '0')}</span>
                     <span className="text-sm">Horas</span>
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center bg-black px-4 py-2">
                     <span className="text-4xl font-bold">{timeLeft.minutes.toString().padStart(2, '0')}</span>
                     <span className="text-sm">Minutos</span>
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center bg-black px-4 py-2">
                     <span className="text-4xl font-bold">{timeLeft.seconds.toString().padStart(2, '0')}</span>
                     <span className="text-sm">Segundos</span>
                 </div>
@@ -164,154 +190,254 @@ const Page = () => {
         </div>
 
         {/* Nova seção Crypto Boost */}
-      <div className="flex flex-col items-center justify-center text-center p-8 w-full mx-auto bg-white text-black">
-        <div className="max-w-4xl">
-          <h2 className="text-3xl font-bold mb-6">O que é a Mentoria Crypto Boost?</h2>
-          <div className="space-y-4 text-lg">
-            <p>
-              A Mentoria Crypto Boost é o lugar onde você terá a carteira recomendada pelo André Franco e acesso ao seu direcionamento para saber <span className="font-bold">o que comprar</span>, em qual <span className="font-bold">percentual</span>, <span className="font-bold">quando</span> comprar e, o principal: <span className="font-bold">a hora certa de vender cada ativo.</span>
-            </p>
-            <p>
-              Você saberá exatamente a hora de realizar os lucros para nunca mais ver seu patrimônio derreter abraçado com um ativo que você não soube a hora certa de vender.
-            </p>
-            <p>
-              Eu não sei se você sabe, <span className="font-bold">mas a carteira da mentoria já mais que dobrou nos últimos 4 meses (seu tempo de criação).</span>
-            </p>
-            <p className="italic">
-              "Mas já não valorizou demais?"
-            </p>
-            <p>
-              A verdade é que isso é APENAS o começo. <span className="font-bold">Nós estamos MUITO próximos de um GRANDE salto de valorização pós-halving.</span> E esse salto promete ser muito mais agressivo que o anterior. Sem dúvidas, agora é a MELHOR hora para você entrar.
-            </p>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-xl font-bold mt-8">
-              ENTENDI! QUERO RESERVAR MINHA VAGA NA MENTORIA CRYPTO BOOST AGORA!
-            </button>
-          </div>
-        </div>
-        </div>
-
-        <div className="flex flex-col items-center justify-center text-center p-8 w-full mx-auto bg-green-500 text-white">
-        <div className="max-w-4xl">
-          <h2 className="text-3xl font-bold mb-6">Para quem é a Mentoria?</h2>
-          <p className="text-lg mb-8">
-            Em poucas palavras: a mentoria é para quem tem mais dinheiro do que tempo para acompanhar o mercado. 
-            É para quem quer sabe que está próximo de um momento de grande potencial de valorizações e quer 
-            aproveitar esse ciclo para multiplicar o seu patrimônio cripto.
+        <div
+      ref={ref}
+      className="flex flex-col items-center justify-center text-left p-8 w-full mx-auto bg-white text-black"
+    >
+      <div className="max-w-2xl">
+        <motion.h2
+          className="text-4xl font-extrabold mb-6 mt-6 font-sans"
+          initial="hidden"
+          whileInView="visible"
+          variants={variants}
+        >
+          O que é a Mentoria Crypto Boost?
+        </motion.h2>
+        <motion.div
+          className="space-y-4 font-sans text-xl"
+          initial="hidden"
+          whileInView="visible"
+          variants={variants}
+        >
+          <p>
+            A Mentoria Crypto Boost é o lugar onde você terá a carteira recomendada
+            pelo André Franco e acesso ao seu direcionamento para saber{" "}
+            <span className="font-bold">o que comprar</span>, em qual{" "}
+            <span className="font-bold">percentual</span>,{" "}
+            <span className="font-bold">quando</span> comprar e, o principal:{" "}
+            <span className="font-bold">a hora certa de vender cada ativo.</span>
           </p>
-          
-          <div className="space-y-6 text-left">
-            <div className="bg-gray-700 p-6 rounded-lg">
-              <h3 className="text-xl font-bold text-blue-400 mb-2">1. PARA INICIANTES</h3>
-              <p className="text-lg">
-                <span className="font-bold">Para quem é iniciante, nunca investiu em nada</span> e quer ter o 
-                direcionamento de especialistas para começar agora em cripto;
-              </p>
-            </div>
+          <p>
+            Você saberá exatamente a hora de realizar os lucros para nunca mais ver
+            seu patrimônio derreter abraçado com um ativo que você não soube a
+            hora certa de vender.
+          </p>
+          <p>
+            Eu não sei se você sabe,{" "}
+            <span className="font-bold">
+              mas a carteira da mentoria já mais que dobrou nos últimos 4 meses
+              (seu tempo de criação).
+            </span>
+          </p>
+          <p className="italic">"Mas já não valorizou demais?"</p>
+          <p>A verdade é que isso é APENAS o começo.</p>
+          <p>
+            <span className="font-bold">
+              Nós estamos MUITO próximos de um GRANDE salto de valorização pós-halving.
+            </span>
+          </p>
+          <p>
+            E esse salto promete ser muito mais agressivo que o anterior. Sem dúvidas,
+            agora é a MELHOR hora para você entrar.
+          </p>
+          <motion.button
+            className="bg-[#0BEC16] hover:bg-green-700 text-black px-8 py-4 rounded-lg text-xl font-bold mt-8"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            variants={variants}
+            initial="hidden"
+            animate={controls}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            ENTENDI! QUERO RESERVAR MINHA VAGA NA MENTORIA CRYPTO BOOST AGORA!
+          </motion.button>
+        </motion.div>
+      </div>
+    </div>
+    
+        <div
+      ref={ref}
+      className="flex flex-col items-center justify-center text-left p-8 w-full mx-auto bg-green-500 text-black"
+    >
+      <div className="max-w-2xl">
+        <motion.h2
+          className="text-4xl font-extrabold mb-6 font-sans"
+          initial="hidden"
+          whileInView="visible"
+          variants={variants}
+        >
+          Para quem é a Mentoria?
+        </motion.h2>
+        <motion.p
+          className="text-lg mb-8"
+          initial="hidden"
+          whileInView="visible"
+          variants={variants}
+        >
+          Em poucas palavras: a mentoria é para quem tem mais dinheiro do que
+          tempo para acompanhar o mercado.
+        </motion.p>
+        <motion.p
+          className="text-lg mb-8"
+          initial="hidden"
+          whileInView="visible"
+          variants={variants}
+        >
+          É para quem sabe que está próximo de um momento de grande potencial
+          de valorizações e quer aproveitar esse ciclo para multiplicar o seu
+          patrimônio cripto.
+        </motion.p>
 
-            <div className="bg-gray-700 p-6 rounded-lg">
-              <h3 className="text-xl font-bold text-blue-400 mb-2">2. PARA O INVESTIDOR TRADICIONAL</h3>
-              <p className="text-lg">
-                <span className="font-bold">Para quem já é investidor no mercado de investimentos tradicional,</span> nunca 
-                comprou um bitcoin e quer começar agora em cripto;
-              </p>
-            </div>
-
-            <div className="bg-gray-700 p-6 rounded-lg">
-              <h3 className="text-xl font-bold text-blue-400 mb-2">3. PARA QUEM SÓ COMPROU BITCOIN</h3>
-              <p className="text-lg">
-                <span className="font-bold">Para quem já tem experiência, já investe em bitcoin</span> e agora 
-                quer montar uma carteira para buscar multiplicar seu patrimônio de verdade;
-              </p>
-            </div>
-
-            <div className="bg-gray-700 p-6 rounded-lg">
-              <h3 className="text-xl font-bold text-blue-400 mb-2">4. PARA QUEM JÁ PASSOU POR OUTROS CICLOS</h3>
-              <p className="text-lg">
-                <span className="font-bold">Para quem já tem experiência de ciclos anteriores,</span> investe em 
-                vários ativos e agora quer ter o direcionamento do André para sair na hora certa e botar grana 
-                no bolso de verdade.
-              </p>
-            </div>
+        <div className="space-y-6 text-left">
+            {[
+              {
+                title: "1. PARA INICIANTES",
+                description:
+                  "Para quem é iniciante, nunca investiu em nada e quer ter o direcionamento de especialistas para começar agora em cripto;",
+              },
+              {
+                title: "2. PARA O INVESTIDOR TRADICIONAL",
+                description:
+                  "Para quem já é investidor no mercado de investimentos tradicional, nunca comprou um bitcoin e quer começar agora em cripto;",
+              },
+              {
+                title: "3. PARA QUEM SÓ COMPROU BITCOIN",
+                description:
+                  "Para quem já tem experiência, já investe em bitcoin e agora quer montar uma carteira para buscar multiplicar seu patrimônio de verdade;",
+              },
+              {
+                title: "4. PARA QUEM JÁ PASSOU POR OUTROS CICLOS",
+                description:
+                  "Para quem já tem experiência de ciclos anteriores, investe em vários ativos e agora quer ter o direcionamento do André para sair na hora certa e botar grana no bolso de verdade.",
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                className="bg-white p-8 rounded-lg"
+                initial="hidden"
+                whileInView="visible"
+                variants={variants}
+              >
+                <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                <p className="text-lg">{item.description}</p>
+              </motion.div>
+            ))}
           </div>
 
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-xl font-bold mt-8">
+          <motion.button
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-xl font-bold mt-8 mb-8"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            variants={variants}
+            initial="hidden"
+            animate={controls}
+            transition={{ duration: 0.8, delay: 1.5 }}
+          >
             FAZ SENTIDO… RESERVA MINHA VAGA NA MENTORIA AGORA!
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Nova seção O que você irá receber */}
-      <div className="flex flex-col items-center justify-center p-8 max-w-6xl mx-auto bg-gray-900 text-white">
-        <div className="w-full max-w-4xl">
-          <h2 className="text-3xl font-bold mb-8 text-center">O que você irá receber:</h2>
-          
-          <div className="space-y-8">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="bg-gray-800 rounded-lg p-6 shadow-lg">
-                <div className="flex flex-col items-center md:items-start md:flex-row">
-                  <div className="flex-shrink-0">
-                    {benefit.icon}
+      <motion.div
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={variants}
+    >
+      {/* Header Section with Animation */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center justify-center text-center w-full mx-auto bg-black text-white"
+      >
+  
+        {/* Benefits Section with Staggered Animation */}
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          variants={variants}
+          className="flex flex-col items-center justify-center p-8 w-full mx-auto bg-white text-white"
+        >
+          <div className="w-full max-w-2xl">
+            <motion.h2 
+              variants={variants}
+              className="text-4xl font-extrabold mb-8 text-center font-sans text-black"
+            >
+              O que você irá receber:
+            </motion.h2>
+            
+            <div className="space-y-8">
+              {benefits.map((benefit, index) => (
+                <motion.div 
+                  key={index}
+                  variants={variants}
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-black rounded-lg p-10 shadow-lg"
+                >
+                  {/* Benefit content remains the same */}
+                  <div className="flex flex-col items-center md:items-start md:flex-row">
+                    <div className="flex-shrink-0">
+                      {benefit.icon}
+                    </div>
+                    <div className="md:ml-6 space-y-4">
+                      <h3 className="text-xl font-bold text-white text-left">{benefit.title}</h3>
+                      <p className="text-lg text-left">{benefit.description}</p>
+                    </div>
                   </div>
-                  <div className="md:ml-6 space-y-4">
-                    <h3 className="text-xl font-bold text-blue-400">{benefit.title}</h3>
-                    <p className="text-lg">{benefit.description}</p>
-                    
-                    {benefit.features && (
-                      <ul className="list-disc list-inside space-y-2">
-                        {benefit.features.map((feature, idx) => (
-                          <li key={idx} className="text-lg">{feature}</li>
-                        ))}
-                      </ul>
-                    )}
-                    
-                    {benefit.vipFeatures && (
-                      <div className="space-y-4 mt-4">
-                        {benefit.vipFeatures.map((feature, idx) => (
-                          <div key={idx} className="bg-gray-700 p-4 rounded-lg">
-                            <h4 className="font-bold text-lg text-blue-300 mb-2">{feature.title}</h4>
-                            <p>{feature.description}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-xl font-bold">
-              ENTENDI! QUERO RESERVAR MINHA VAGA NA MENTORIA CRYPTO BOOST AGORA!
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-center justify-center p-8 max-w-6xl mx-auto bg-gray-800 text-white">
-        <div className="w-full max-w-4xl text-center">
-          <div className="bg-gray-700 rounded-lg p-8 shadow-lg">
-            <div className="flex flex-col items-center space-y-6">
-              <MessageCircle className="w-16 h-16 text-blue-400" />
-              
-              <h2 className="text-3xl font-bold">AINDA ESTOU COM DÚVIDAS…</h2>
-              
-              <p className="text-lg max-w-2xl">
-                A minha equipe está pronta para esclarecer qualquer questão que você tenha, 
-                seja sobre os detalhes da mentoria, como funciona o acesso, ou mesmo sobre o 
-                potencial de retorno que a sua carteira cripto possa ter. Nós vamos esclarecer 
-                todas as suas questões para que você se sinta seguro e preparado para fazer 
-                parte deste grupo exclusivo de investidores.
-              </p>
-
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-xl font-bold mt-4 flex items-center space-x-2">
-                <MessageCircle className="w-6 h-6" />
-                <span>TOQUE AQUI PARA FALAR COM MINHA EQUIPE!</span>
-              </button>
+                </motion.div>
+              ))}
             </div>
           </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+
+    <div className="flex flex-col items-center justify-center p-8 w-full mx-auto bg-green-300 text-black">
+      <div className="w-full max-w-4xl text-left" ref={ref}>
+        <div className="rounded-lg p-8">
+          <div className="flex flex-col items-center space-y-6">
+            <MessageCircle className="w-16 h-16 text-black" />
+
+            {/* Título com animação */}
+            <motion.h2
+              className="text-3xl font-bold"
+              initial="hidden"
+              animate={controls}
+              variants={variants}
+            >
+              AINDA ESTOU COM DÚVIDAS…
+            </motion.h2>
+
+            {/* Parágrafo com animação */}
+            <motion.p
+              className="text-lg max-w-2xl"
+              initial="hidden"
+              animate={controls}
+              variants={variants}
+            >
+              A minha equipe está pronta para esclarecer qualquer questão que você tenha,
+              seja sobre os detalhes da mentoria, como funciona o acesso, ou mesmo sobre o
+              potencial de retorno que a sua carteira cripto possa ter. <br /> <br />Nós vamos esclarecer
+              todas as suas questões para que você se sinta seguro e preparado para fazer
+              parte deste grupo exclusivo de investidores.
+            </motion.p>
+
+            {/* Botão com animação */}
+            <motion.button
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-xl font-bold mt-4 flex items-center space-x-2"
+              initial="hidden"
+              animate={controls}
+              variants={variants}
+            >
+              <MessageCircle className="w-6 h-6" />
+              <span>TOQUE AQUI PARA FALAR COM MINHA EQUIPE!</span>
+            </motion.button>
+          </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
